@@ -1,0 +1,23 @@
+recruiter-pool
+
+login google or linkind 
+
+get info from linkndin 
+
+platform ? connecting componies to freelance recruiters
+
+area going in e commornce linking recruiters to 
+
+open for specfic market = e commornce companies looking for wrokers
+
+freelance recruiters charge 5% companies charge 14%
+
+Feature:
+when recruiter send message client has to answer within 3 days for fast turn around
+
+otherside candidate:
+choice sign up to platform? all communcations through platform  
+should be link recruiter to canditate to track process
+
+everyone gets ratings
+based on reply speed etc
