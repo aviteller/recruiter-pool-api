@@ -27,7 +27,9 @@ const getUser = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 
 const createUser = asyncHandler(async (req, res, next) => {
+  req.body.password = "123456";
   const user = await User.create(req.body);
+
   await auditLog("User", user._id, "created", req.user);
 
   res.status(201).json({ success: true, data: user });
@@ -64,12 +66,19 @@ const deleteUser = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`User with ID ${req.params.id} Not Found`, 401)
     );
 
+  if (user.deleted) {
+    await user.remove();
+    await auditLog("User", user._id, "deleted", req.user);
+  } else {
+    await User.findByIdAndUpdate(req.params.id, {
+      deleted: true,
+    });
+    await auditLog("User", user._id, "marked-deleted", req.user);
+  }
+
   //changing from perma delete to marking deleted as true
   // await user.remove();
-  await User.findByIdAndUpdate(req.params.id, {
-    deleted: true,
-  });
-  await auditLog("User", user._id, "deleted", req.user);
+
   res.status(200).json({ success: true, data: {} });
 });
 

@@ -8,7 +8,7 @@ const {
   resetPassword,
   updateDetails,
   updatePassword,
-  logout
+  logout,
 } = require("../controllers/auth");
 const { protect } = require("../middleware/auth");
 
@@ -16,6 +16,14 @@ const User = require("../models/User");
 
 router.post("/register", register);
 router.get("/logout", logout);
+router.get("/test", (req, res) => {
+  console.log(req.cookies);
+  res.status(200).json({ success: true, data: {} });
+});
+router.put("/test", (req, res) => {
+  console.log("Put", req.cookies);
+  res.status(200).json({ success: true, data: {} });
+});
 router.post("/login", login);
 router.get("/me", protect, getMe);
 router.put("/updatedetails", protect, updateDetails);

@@ -16,11 +16,11 @@ const advancedResults = require("../middleware/advancedResults");
 const { protect, authorize } = require("../middleware/auth");
 
 // //include other resource routers
-// const courseRouter = require("./courses");
+const jobRouter = require("./jobs");
 // const reviewRouter = require("./reviews");
 
 // //re-route into other resource router
-// router.use("/:bootcampId/courses", courseRouter);
+router.use("/:companyId/jobs", jobRouter);
 // router.use("/:bootcampId/reviews", reviewRouter);
 
 router.route("/radius/:zipcode/:distance/:unit?").get(getCompaniesInRadius);

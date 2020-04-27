@@ -16,6 +16,7 @@ const connectDB = require("./config/db");
 
 // route files
 const companies = require("./routes/companies");
+const jobs = require("./routes/jobs");
 const courses = require("./routes/courses");
 const auth = require("./routes/auth");
 const users = require("./routes/users");
@@ -56,13 +57,22 @@ app.use(limter);
 //cookie middleware
 app.use(cookieParser());
 //enable cors
-app.use(cors());
+var corsOptions = {
+  origin: 'http://localhost:5000',
+  credentials:  true
+}
+
+app.use(cors(corsOptions));
 
 //set static folder maybe for front end stuff
 app.use(express.static(path.join(__dirname, "public")));
 
+//test
+
+
 //mount router
 app.use("/api/v1/companies", companies);
+app.use("/api/v1/jobs", jobs);
 // app.use("/api/v1/courses", courses);
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/users", users);

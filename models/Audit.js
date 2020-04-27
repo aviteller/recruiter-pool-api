@@ -9,6 +9,10 @@ const AuditSchema = new mongoose.Schema(
       ref: "User",
     },
     action: { type: String, default: "" },
+    parent: {
+      parentModel: { type: String },
+      parentId: { type: String },
+    },
   },
   { timestamps: { createdAt: "createdAt" } }
 );
