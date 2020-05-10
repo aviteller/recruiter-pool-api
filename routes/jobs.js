@@ -19,7 +19,7 @@ router
   .get(
     advancedResults(Job, {
       path: "company",
-      select: "name description"
+      select: "name description",
     }),
     getJobs
   )
@@ -28,6 +28,7 @@ router
 router
   .route("/:id")
   .get(getJob)
+
   .put(protect, authorize("company", "admin"), updateJob)
   .delete(protect, authorize("company", "admin"), deleteJob);
 

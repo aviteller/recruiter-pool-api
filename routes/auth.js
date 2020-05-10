@@ -11,6 +11,10 @@ const {
   logout,
 } = require("../controllers/auth");
 const { protect } = require("../middleware/auth");
+// //include other resource routers
+const companiesRouter = require("./companies");
+
+router.use("/:userId/companies", companiesRouter);
 
 const User = require("../models/User");
 

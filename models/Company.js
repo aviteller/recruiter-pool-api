@@ -74,6 +74,10 @@ const CompanySchema = new mongoose.Schema(
       min: [1, "Rating must be at least 1"],
       max: [10, "Rating must can not be more than 10"],
     },
+    companySize: {
+      type: Number,
+      default: null,
+    },
     photo: {
       type: String,
       default: "no-photo.jpg",
@@ -133,6 +137,16 @@ CompanySchema.virtual("jobs", {
   localField: "_id",
   foreignField: "company",
   justOne: false,
+  match: { deleted: false },
+});
+
+// reverse populate with virtuals
+CompanySchema.virtual("images", {
+  ref: "Image",
+  localField: "_id",
+  foreignField: "company",
+  justOne: false,
+  match: { deleted: false },
 });
 
 module.exports = mongoose.model("Company", CompanySchema);

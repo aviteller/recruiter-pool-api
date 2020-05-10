@@ -3,6 +3,7 @@ const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const geocoder = require("../utils/geocoder");
 const Company = require("../models/Company");
+const Image = require("../models/Image");
 const auditLog = require("./audit");
 
 // @desc    Get All Companies
@@ -16,7 +17,11 @@ const getCompanies = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/companies/:id
 // @access  Public
 const getCompany = asyncHandler(async (req, res, next) => {
-  const company = await Company.findById(req.params.id);
+  const company = await Company.findById(req.params.id)
+    .populate("user")
+    .populate("jobs")
+    .populate("images");
+
   if (!company) {
     return next(
       new ErrorResponse(`Company not found with id ${req.params.id}`, 404)
@@ -57,6 +62,21 @@ const createCompany = asyncHandler(async (req, res, next) => {
 // @access  Private
 const updateCompany = asyncHandler(async (req, res, next) => {
   let company = await Company.findById(req.params.id);
+
+  //check for published company
+  const publishedCompany = await Company.findOne({
+    user: req.body.user,
+    _id: { $ne: req.params.id },
+  });
+
+  if (publishedCompany) {
+    return next(
+      new ErrorResponse(
+        `The user with ID ${req.user.id} has already published a company`,
+        400
+      )
+    );
+  }
 
   if (!company) {
     return next(
@@ -137,7 +157,7 @@ const deleteCompany = asyncHandler(async (req, res, next) => {
     deleted: true,
   });
 
-  await auditLog("Company", company._id, "deleted", req.user); 
+  await auditLog("Company", company._id, "deleted", req.user);
 
   res.status(200).json({ success: true, data: {} });
 });
@@ -190,10 +210,85 @@ const companyPhotoUpload = asyncHandler(async (req, res, next) => {
       console.log(err);
       return next(new ErrorResponse(`PROBLEM with file upload`, 500));
     }
+
     await Company.findByIdAndUpdate(req.params.id, { photo: file.name });
+
+    await auditLog("Company", req.params.id, "photo-uploaded", req.user);
 
     res.status(200).json({ success: true, data: file.name });
   });
+});
+
+// @desc    Upload photo for company
+// @route   PUT /api/v1/companies/:id/teamphoto
+// @access  Private
+const companyImageUpload = asyncHandler(async (req, res, next) => {
+  const company = await Company.findById(req.params.id);
+
+  if (!company) {
+    return next(
+      new ErrorResponse(`Company not found with id ${req.params.id}`, 404)
+    );
+  }
+
+  //make sure user is company owner
+  if (company.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(
+        `User ${req.user.id} is not authorized to upload photo to this company`,
+        401
+      )
+    );
+  }
+
+  if (!req.files) {
+    return next(new ErrorResponse(`Please upload file`, 400));
+  }
+
+  let file = req.files.file;
+
+  // check if photo
+  if (!file.mimetype.startsWith("image")) {
+    return next(new ErrorResponse(`File needs to be an image`, 400));
+  }
+
+  // check file size
+  if (file.size > process.env.MAX_FILE_UPLOAD) {
+    return next(
+      new ErrorResponse(`MAX file size ${process.env.MAX_FILE_UPLOAD}`, 400)
+    );
+  }
+
+  let newObj = {
+    company: req.params.id,
+    title: req.body.title,
+    imageType: req.body.imageType,
+  };
+
+  let newImage = await Image.create(newObj);
+  // create custom filename
+  file.name = `${newImage._id}${path.parse(file.name).ext}`;
+
+  file.mv(
+    `${process.env.FILE_UPLOAD_PATH}/${req.body.imageType}/${file.name}`,
+    async (err) => {
+      if (err) {
+        console.log(err);
+        return next(new ErrorResponse(`PROBLEM with file upload`, 500));
+      }
+
+      await Image.findByIdAndUpdate(newImage._id, { image: file.name });
+
+      await auditLog(
+        "CompanyTeamImage",
+        req.params.id,
+        "photo-uploaded",
+        req.user
+      );
+
+      res.status(200).json({ success: true, data: file.name });
+    }
+  );
 });
 
 module.exports = {
@@ -204,4 +299,5 @@ module.exports = {
   deleteCompany,
   getCompaniesInRadius,
   companyPhotoUpload,
+  companyImageUpload,
 };

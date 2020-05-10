@@ -8,6 +8,7 @@ const {
   deleteCompany,
   getCompaniesInRadius,
   companyPhotoUpload,
+  companyImageUpload
 } = require("../controllers/companies");
 
 const Company = require("../models/Company");
@@ -28,11 +29,11 @@ router.route("/radius/:zipcode/:distance/:unit?").get(getCompaniesInRadius);
 //file upload
 router
   .route("/:id/photo")
-  .put(protect, authorize("company", "admin"), companyPhotoUpload);
+  .put(protect, authorize("company", "admin"), companyImageUpload);
 
 router
   .route("/")
-  .get(advancedResults(Company, "jobs"), getCompanies)
+  .get(advancedResults(Company, "jobs,user"), getCompanies)
   .post(protect, authorize("company", "admin"), createCompany);
 
 router

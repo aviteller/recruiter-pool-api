@@ -9,7 +9,7 @@ const advancedResults = (model, populate) => async (req, res, next) => {
 
   // fields to exclude
 
-  const removeFields = ["select", "sort", "page", "limit"];
+  const removeFields = ["select", "sort", "page", "limit","nopop"];
 
   //loop to remove fields and delete from reqQuery
 
@@ -56,8 +56,16 @@ const advancedResults = (model, populate) => async (req, res, next) => {
   query = query.skip(startIndex).limit(limit);
 
   //populate
-  if (populate) {
-    query = query.populate(populate);
+  if (populate && !req.query.nopop) {
+    if (populate.includes(",")) {
+      populate = populate.split(",");
+      populate.forEach((p) => {
+        console.log(p)
+        query = query.populate(p);
+      });
+    } else {
+      query = query.populate(populate);
+    }
   }
 
   const results = await query;

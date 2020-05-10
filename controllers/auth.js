@@ -3,6 +3,7 @@ const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User");
+const Company = require("../models/Company");
 const auditLog = require("./audit");
 // @desc    Register user
 // @route   POST /api/v1/auth/register
@@ -79,7 +80,13 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 // @route   Get /api/v1/auth/me
 // @access  Private
 const getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  let user = await User.findById(req.user.id);
+
+  const company = await Company.findOne({ user: req.user.id });
+  if (company) {
+    user = user.toObject();
+    user.company = company;
+  }
 
   res.status(200).json({
     success: true,
@@ -205,16 +212,16 @@ const sendTokenResponse = (user, statusCode, res) => {
   }
 
   let userToSend = {
-    name:user.name,
-    email:user.email,
-    role:user.role,
-    token
-  }
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    token,
+  };
 
   res
     .status(statusCode)
     .cookie("token", token, options)
-    .json({ success: true, data:userToSend });
+    .json({ success: true, data: userToSend });
 };
 
 module.exports = {

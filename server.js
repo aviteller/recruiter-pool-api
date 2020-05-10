@@ -16,6 +16,8 @@ const connectDB = require("./config/db");
 
 // route files
 const companies = require("./routes/companies");
+const messagerooms = require("./routes/messagerooms");
+const messages = require("./routes/messages");
 const jobs = require("./routes/jobs");
 const courses = require("./routes/courses");
 const auth = require("./routes/auth");
@@ -50,17 +52,18 @@ app.use(hpp());
 //Rate limiting
 const limter = rateLimit({
   windowMs: 10 * 60 * 1000, //10 mins
-  max: 100
+  max: 100,
 });
 
 app.use(limter);
 //cookie middleware
 app.use(cookieParser());
 //enable cors
+// this is allowing handling of cookies from the front end
 var corsOptions = {
-  origin: 'http://localhost:5000',
-  credentials:  true
-}
+  origin: "http://localhost:5000",
+  credentials: true,
+};
 
 app.use(cors(corsOptions));
 
@@ -69,7 +72,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //test
 
-
 //mount router
 app.use("/api/v1/companies", companies);
 app.use("/api/v1/jobs", jobs);
@@ -77,6 +79,8 @@ app.use("/api/v1/jobs", jobs);
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/users", users);
 app.use("/api/v1/reviews", reviews);
+app.use("/api/v1/messagerooms", messagerooms);
+app.use("/api/v1/messages", messages);
 
 app.use(errorHandler);
 

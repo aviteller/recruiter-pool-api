@@ -12,6 +12,8 @@ const auditLog = async (model, id, action, user, parent) => {
     parent,
   };
 
+  
+
   await Audit.create(auditBody);
 };
 

@@ -23,10 +23,15 @@ const getJobs = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/jobs/:id
 // @access  Public
 const getJob = asyncHandler(async (req, res, next) => {
-  const job = await Job.findById(req.params.id).populate({
-    path: "job",
-    select: "name description",
-  });
+  const job = await Job.findById(req.params.id)
+    .populate({
+      path: "job",
+      select: "name description",
+    })
+    .populate({
+      path: "company",
+      select: "name _id",
+    });
 
   if (!job) {
     return next(
